@@ -1,0 +1,609 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Aural Test</title>
+    <script type="text/javascript" ></script>
+    <style type="text/css">
+        html {
+            background: url(wall2.jpg) ;
+            background-repeat:no-repeat;
+            background-position:left top;
+            background-size:2000px 1000px;
+        }
+        h1
+        {   font-family: 'Dancing Script', Georgia, Times, serif;
+            color:white;
+            font-size:150%;}
+        b
+        {
+            font-size:150%;
+            color:red;
+        }
+        h2
+        {
+            font-size:100%;
+            color:White;
+        }
+        #awesome1,#awesome2,#awesome3,#awesome4,#awesome5,#awesome6,#awesome7,#awesome8,#awesome9,#awesome10,#awesome11,#awesome12,#awesome13,#awesome14,#myInterval,#awesome15,#myChordType
+        {
+            background: #222;
+
+            padding: 5px 10px 6px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            line-height: 1;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            -moz-box-shadow: 0 1px 3px #999;
+            -webkit-box-shadow: 0 1px 3px #999;
+
+            border-bottom: 1px solid #222;
+
+        }
+
+
+    </style>
+</head>
+<body>
+<br />
+<button id="awesome1" onclick="playInterval()">Play Interval</button><button id="awesome2" onclick="replay()">Replay</button>
+<h2>
+    <input type="radio" id="awesome9" name="interval" value="melodic" checked="checked">Melodic Intervals
+    <input type="radio" id="awesome10" name="interval" value="harmonic" >Harmonic Intervals
+</h2>
+
+<h1>Choose Interval:</h1><select id="myInterval">
+    <option value="unison">unison</option>
+    <option value="m2">minor second</option>
+    <option value="M2">major second</option>
+    <option value="m3">minor third</option>
+    <option value="M3">major third</option>
+    <option value="p4">perfect fourth</option>
+    <option value="b5">diminished fifth</option>
+    <option value="p5">perfect fifth</option>
+    <option value="m6">minor sixth</option>
+    <option value="M6">major sixth</option>
+    <option value="m7">minor seventh</option>
+    <option value="M7">major seventh</option>
+
+</select>
+<button id="awesome3" onclick="submitAnswer()">Submit</button><p>  <br />    </p><button id="awesome4" onclick="giveAnswer()">Give Up</button><b id='textToChange2'></b>
+<br />
+<br />
+<h1>Your Answer is <b id='textToChange'> </b></h1>
+
+
+<br />
+<button id="awesome5" onclick="playChord()">Play Chord</button><button id="awesome6" onclick="replayChord()">Replay</button>
+<br />
+<h1>Choose Chord Type:</h1><select id="myChordType">
+    <option value="maj">maj</option>
+    <option value="min">min</option>
+    <option value="dim">dim</option>
+    <option value="aug">aug</option>
+    <option value="6">6</option>
+    <option value="m6">m6</option>
+    <option value="maj7">maj7</option>
+    <option value="m7">m7</option>
+    <option value="7">7</option>
+    <option value="dim7">dim7</option>
+    <option value="m7b5">m7b5</option>
+</select>
+<button id="awesome7" onclick="submitChordAnswer()">Submit</button><p>  <br />    </p><button id="awesome8" onclick="giveChordAnswer()">Give Up</button><b id='textToChange4'></b>
+<br />
+<br />
+<h1>Your Answer is <b id='textToChange3'> </b></h1>
+
+
+
+
+<b>Repeat-the-phrase</b>
+<button id="awesome11" onclick="generatePhrase()" >Generate</button>
+<h2>Scale:<b id='TTC'></b>&nbsp; &nbsp; &nbsp; &nbsp; <button id="awesome12" onclick="playPhrase()"">Play Phrase</button><button id="awesome13" onclick="playPhrase()"">Replay Phrase</button></h2>
+<b id='TTC1'></b>
+<br />
+<b id='TTC2'></b>
+<br />
+<b id='TTC3'></b>
+<br />
+<b id='TTC4'></b>
+<br />
+<b id='TTC5'></b>&nbsp; &nbsp; &nbsp; &nbsp; <button id="awesome14" onclick="revealNotes()"">Reveal Notes</button>
+<br />
+<b id='TTC6'></b>
+<br />
+<b id='TTC7'></b>
+<br />
+<b id='TTC8'></b>
+
+
+
+<script type="text/javascript">
+
+var Notes=new Array();// all 3 octaves
+var NotesAudio=new Array();//association with audio files
+var Notes2=new Array();//no octaves
+var NotesInOrder=new Array();//proper order,C first
+Notes.push("C2","Cs2","D2","Ds2","E2","F2","Fs2","G2","Gs2","A2","As2","B2","C3","Cs3","D3","Ds3","E3","F3","Fs3","G3","Gs3","A3","As3","B3","C4","Cs4","D4","Ds4","E4","F4","Fs4","G4","Gs4","A4","As4","B4");
+Notes2.push("A","As","B","C","Cs","D","Ds","E","F","Fs","G","Gs","A","As","B","C","Cs","D","Ds","E","F","Fs","G","Gs");
+NotesInOrder.push("C","Cs","D","Ds","E","F","Fs","G","Gs","A","As","B");
+var correctInterval;
+var correctChord;
+var gaudio1,gsaudio2;
+var gaudios= new Array();
+var phraseGlobal= new Array();
+var phraseNotes= new Array();
+var tonicGlobal;
+
+
+var resetGlobals = function ()
+{
+    phraseGlobal = [];
+    phraseNotes = [];
+}
+
+
+
+
+function BufferLoader(context, urlList, callback) {
+    this.context = context;
+    this.urlList = urlList;
+    this.onload = callback;
+    this.bufferList = new Array();
+    this.loadCount = 0;
+}
+
+BufferLoader.prototype.loadBuffer = function(url, index) {
+    // Load buffer asynchronously
+    var request = new XMLHttpRequest();
+    request.open("GET", url, true);
+    request.responseType = "arraybuffer";
+
+    var loader = this;
+
+    request.onload = function() {
+        // Asynchronously decode the audio file data in request.response
+        loader.context.decodeAudioData(
+                request.response,
+                function(buffer) {
+                    if (!buffer) {
+                        alert('error decoding file data: ' + url);
+                        return;
+                    }
+                    loader.bufferList[index] = buffer;
+                    if (++loader.loadCount == loader.urlList.length)
+                        loader.onload(loader.bufferList);
+                }
+        );
+    }
+
+    request.onerror = function() {
+        alert('BufferLoader: XHR error');
+    }
+
+    request.send();
+}
+
+BufferLoader.prototype.load = function() {
+    for (var i = 0; i < this.urlList.length; ++i)
+        this.loadBuffer(this.urlList[i], i);
+}
+
+
+
+
+var context;
+var bufferLoader;
+
+
+context = new webkitAudioContext();
+
+bufferLoader = new BufferLoader(
+        context,
+        [
+            "Notes/C2.wav","Notes/Cs2.wav","Notes/D2.wav","Notes/Ds2.wav","Notes/E2.wav","Notes/F2.wav","Notes/Fs2.wav","Notes/G2.wav","Notes/Gs2.wav","Notes/A2.wav","Notes/As2.wav","Notes/B2.wav",
+            "Notes/C3.wav","Notes/Cs3.wav","Notes/D3.wav","Notes/Ds3.wav","Notes/E3.wav","Notes/F3.wav","Notes/Fs3.wav","Notes/G3.wav","Notes/Gs3.wav","Notes/A3.wav","Notes/As3.wav","Notes/B3.wav",
+            "Notes/C4.wav","Notes/Cs4.wav","Notes/D4.wav","Notes/Ds4.wav","Notes/E4.wav","Notes/F4.wav","Notes/Fs4.wav","Notes/G4.wav","Notes/Gs4.wav","Notes/A4.wav","Notes/As4.wav","Notes/B4.wav"
+        ]
+        ,finishedLoading
+);
+
+bufferLoader.load();
+
+
+
+function finishedLoading() {
+    alert ("Loading Complete!!!");
+    //alert (bufferLoader.urlList[4]);
+}
+
+
+
+var randTonic = function ()
+{
+    var tonic;
+    var gen=Math.floor((Math.random()*35));
+    tonic=Notes[gen];
+    var result=new Array();
+    result[0]=tonic;
+    result[1]=gen;
+    return result;
+}
+
+var randChordTonic = function ()
+{
+    var tonic;
+    var gen=Math.floor((Math.random()*18)+5);
+    tonic=Notes[gen];
+    var result=new Array();
+    result[0]=tonic;
+    result[1]=gen;
+    if (gen>23) {alert("Too large gen!");}
+    return result;
+}
+
+
+function decideInterval(pos1,pos2)
+{
+    var min,max;
+    if (pos1<pos2) {min=pos1;max=pos2;}
+    else if (pos1>pos2) {min=pos2;max=pos1;}
+    else {return "unison";}
+
+
+    switch (max-min)
+    {
+        case 1:{return "m2"; }
+        case 2:{return "M2"; }
+        case 3:{return "m3"; }
+        case 4:{return "M3"; }
+        case 5:{return "p4"; }
+        case 6:{return "b5"; }
+        case 7:{return "p5"; }
+        case 8:{return "m6"; }
+        case 9:{return "M6"; }
+        case 10:{return "m7"; }
+        case 11:{return "M7"; }
+        case 12:{return "unison"; }
+    }
+}
+
+var replay =function ()
+{
+    var gsound1=new Audio(gaudio1);
+    var gsound2=new Audio(gaudio2);
+    if (document.getElementById('awesome9').checked)
+    {   gsound1.play();
+        setTimeout(function(){gsound2.play();gsound1.pause();},1000);
+    }
+    else{
+        gsound1.play();
+        gsound2.play();
+    }
+
+
+}
+var playInterval = function () {
+
+    document.getElementById('textToChange').innerHTML = "";
+    document.getElementById('textToChange2').innerHTML = "";
+    document.getElementById('textToChange3').innerHTML = "";
+    document.getElementById('textToChange4').innerHTML = "";
+    var result=randTonic();
+    var tonic1=result[0];//First Note
+    var audio1=tonic1.concat(".wav");//First Audio
+    audio1="Notes/".concat(audio1);
+    var pos1=result[1];
+    var pos2;
+    var max;
+    var min;
+    if (pos1<=12)
+    {
+        min=0;
+        max=pos1+12;
+    }
+    else if ((pos1>12)&&(pos1<=23))
+    {
+        min=pos1-12;
+        max=pos1+12;
+    }
+    else
+    {
+        min=pos1-12;
+        max=35;
+    }
+    pos2=Math.floor(Math.random()*(max-min+1))+min;
+    var tonic2=Notes[pos2];
+    var audio2=tonic2.concat(".wav");
+    audio2="Notes/".concat(audio2);
+
+    gaudio1=audio1;
+    gaudio2=audio2;
+
+    var sound1 = new Audio(audio1);
+    var sound2 = new Audio(audio2);
+
+    if (document.getElementById('awesome9').checked)
+    {   sound1.play();
+        setTimeout(function(){sound2.play();sound1.pause();},1000);
+    }
+    else{
+        sound1.play();
+        sound2.play();
+    }
+
+    correctInterval=decideInterval(pos1,pos2);
+}
+
+
+var submitAnswer=function()
+{
+    var y = document.getElementById("myInterval");
+    var userInterval = y.options[y.selectedIndex].value;
+
+    if (userInterval===correctInterval){document.getElementById('textToChange').style.color="green";    document.getElementById('textToChange').innerHTML = "Correct!!!";}
+    else {document.getElementById('textToChange').style.color="red";  document.getElementById('textToChange').innerHTML = "Wrong :(";}
+}
+var submitChordAnswer=function()
+{
+    var y = document.getElementById("myChordType");
+    var userChord = y.options[y.selectedIndex].value;
+
+    if (userChord===correctChord){document.getElementById('textToChange3').style.color="green";    document.getElementById('textToChange3').innerHTML = "Correct!!!";}
+    else {document.getElementById('textToChange3').style.color="red";  document.getElementById('textToChange3').innerHTML = "Wrong :(";}
+}
+var giveAnswer=function()
+{
+    document.getElementById('textToChange2').innerHTML = "            ".concat(correctInterval);
+}
+var giveChordAnswer=function()
+{
+    document.getElementById('textToChange4').innerHTML = "            ".concat(correctChord);
+}
+
+var randChord = function (pos) {
+    var positions = new Array();
+    var gen = Math.floor(Math.random() * 10);
+    switch (gen) {
+        case 0: { positions.push(pos + 4, pos + 7); correctChord = "maj"; break; }
+        case 1: { positions.push(pos + 3, pos + 7); correctChord = "min"; break; }
+        case 2: { positions.push(pos + 3, pos + 6); correctChord = "dim"; break; }
+        case 3: { positions.push(pos + 4, pos + 7); correctChord = "aug"; break; }
+        case 4: { positions.push(pos + 4, pos + 7, pos + 9); correctChord = "6"; break; }
+        case 5: { positions.push(pos + 3, pos + 7, pos + 8); correctChord = "m6"; break; }
+        case 6: { positions.push(pos + 4, pos + 7, pos + 11); correctChord = "maj7"; break; }
+        case 7: { positions.push(pos + 3, pos + 7, pos + 10); correctChord = "m7"; break; }
+        case 8: { positions.push(pos + 3, pos + 6, pos + 10); correctChord = "m7b5"; break; }
+        case 9: { positions.push(pos + 4, pos + 7, pos + 10); correctChord = "7"; break; }
+        case 10: { positions.push(pos + 3, pos + 6, pos + 9); correctChord = "dim7"; break; }
+    }
+    return positions;
+}
+
+var playChord = function ()
+{
+    document.getElementById('textToChange').innerHTML = "";
+    document.getElementById('textToChange2').innerHTML = "";
+    document.getElementById('textToChange3').innerHTML = "";
+    document.getElementById('textToChange4').innerHTML = "";
+    var k;
+    var audios = new Array();
+    var sounds = new Array();
+    var result = randChordTonic();
+    var tonic = result[0]; //First Note
+    var pos = result[1];
+
+    audios[0] = tonic.concat(".wav"); //First Audio
+    audios[0] = "Notes/".concat(audios[0]);
+    gaudios[0]=audios[0];
+    sounds[0] = new Audio(audios[0]);
+
+
+    var positions = randChord(pos);
+    for (k = 0; k < positions.length; k++) {
+        audios[k + 1] = Notes[positions[k]].concat(".wav");
+        audios[k + 1] = "Notes/".concat(audios[k + 1]);
+        gaudios[k + 1]=audios[k + 1];
+        sounds[k + 1] = new Audio(audios[k+1]);
+    }
+
+    if (sounds.length===3)
+    {
+        sounds[0].play();
+        sounds[1].play();
+        sounds[2].play();
+    }
+    else
+    {
+        sounds[0].play();
+        sounds[1].play();
+        sounds[2].play();
+        sounds[3].play();
+    }
+
+}
+
+var replayChord= function()
+{
+    var gsounds=new Array();
+    for (var i=0; i<gaudios.length; i++)
+    {
+        gsounds[i]=new Audio(gaudios[i]);
+    }
+    if (gsounds.legth===3)
+    {
+        gsounds[0].play();
+        gsounds[1].play();
+        gsounds[2].play();
+    }
+    else
+    {
+        gsounds[0].play();
+        gsounds[1].play();
+        gsounds[2].play();
+        gsounds[3].play();
+    }
+}
+
+
+
+var generatePhrase = function()
+{
+
+    resetGlobals();
+
+
+    var tonic="default";
+    var scaleType="default";
+    var octave="default";
+
+
+
+    //1)pick tonic
+    var pos = Math.floor(Math.random() * 22);
+    tonic=Notes[pos];
+    //tonicAudioGlobal=new Audio(NotesAudioDir[pos]);
+    //2)pick scale type
+    var gen = Math.floor(Math.random() * 7);
+    switch (gen)
+    {
+        case 0:{scaleType="Major";break;}
+        case 1:{scaleType="Natural Minor";break;}
+        case 2:{scaleType="Dorian";break;}
+        case 3:{scaleType="Mixolydian";break;}
+        case 4:{scaleType="Harmonic Minor";break;}
+        case 5:{scaleType="Pentatonic Major";break;}
+        case 6:{scaleType="Pentatonic Minor";break;}
+    }
+    title=(tonic.concat(" ")).concat(scaleType);
+    document.getElementById('TTC').innerHTML =title;
+
+    tonicGlobal=pos;
+    //tonicAudioGlobal=tonicAudio;
+
+
+    //5)decide Notes
+    var scale=new Array();
+    var scaleDir=new Array();
+    scale.push(pos);
+    switch(scaleType)
+    {
+        case "Major":
+        {
+            scale.push(pos+2,pos+4,pos+5,pos+7,pos+9,pos+11,pos+12);
+            break;
+        }
+        case "Natural Minor":
+        {
+            scale.push(pos+2,pos+3,pos+5,pos+7,pos+8,pos+10,pos+12);
+            break;
+        }
+        case "Dorian":
+        {
+            scale.push(pos+2,pos+3,pos+5,pos+7,pos+9,pos+10,pos+12);
+            break;
+        }
+        case "Harmonic Minor":
+        {
+            scale.push(pos+2,pos+3,pos+5,pos+7,pos+8,pos+11,pos+12);
+            break;
+        }
+        case "Mixolydian":
+        {
+            scale.push(pos+2,pos+4,pos+5,pos+7,pos+9,pos+10,pos+12);
+            break;
+        }
+        case "Pentatonic Major":
+        {
+            scale.push(pos+2,pos+4,pos+7,pos+9,pos+12);
+            break;
+        }
+        case "Pentatonic Minor":
+        {
+            scale.push(pos+3,pos+5,pos+7,pos+10,pos+12);
+            break;
+        }
+    }
+    //alert(scaleType);
+    //alert(pos);
+    //alert(Notes[scale[0]]);
+
+
+    //7)pick 6 random notes
+    var phrase=new Array();
+    for (var i=0; i<=5; i++)
+    {
+        if ((scaleType==="Pentatonic Major")||(scaleType==="Pentatonic Minor")){gen=Math.floor(Math.random() * 6);}
+    else {gen=Math.floor(Math.random() * 8);}
+        phrase[i]=scale[gen];
+    }
+
+    for (i=0; i<=5; i++)
+    {
+        phraseGlobal.push(phrase[i]);
+        phraseNotes.push(Notes[phrase[i]]);
+    }
+
+}
+
+
+
+var playPhrase = function ()
+{
+
+    //tonic
+
+    var sourceTonic = context.createBufferSource();
+    var source1 = context.createBufferSource();
+    var source2 = context.createBufferSource();
+    var source3 = context.createBufferSource();
+    var source4 = context.createBufferSource();
+    var source5 = context.createBufferSource();
+    var source6 = context.createBufferSource();
+
+    sourceTonic.buffer = bufferLoader.bufferList[tonicGlobal];
+    source1.buffer = bufferLoader.bufferList[phraseGlobal[0]];
+    source2.buffer = bufferLoader.bufferList[phraseGlobal[1]];
+    source3.buffer = bufferLoader.bufferList[phraseGlobal[2]];
+    source4.buffer = bufferLoader.bufferList[phraseGlobal[3]];
+    source5.buffer = bufferLoader.bufferList[phraseGlobal[4]];
+    source6.buffer = bufferLoader.bufferList[phraseGlobal[5]];
+
+    sourceTonic.connect(context.destination);
+    source1.connect(context.destination);
+    source2.connect(context.destination);
+    source3.connect(context.destination);
+    source4.connect(context.destination);
+    source5.connect(context.destination);
+    source6.connect(context.destination);
+
+    sourceTonic.start(context.currentTime);
+    source1.start(context.currentTime+2);
+    source2.start(context.currentTime+3);
+    source3.start(context.currentTime+4);
+    source4.start(context.currentTime+5);
+    source5.start(context.currentTime+6);
+    source6.start(context.currentTime+7);
+
+
+
+
+}
+
+
+var revealNotes = function ()
+{
+    document.getElementById('TTC1').innerHTML = phraseNotes[0];
+    document.getElementById('TTC2').innerHTML = phraseNotes[1];
+    document.getElementById('TTC3').innerHTML = phraseNotes[2];
+    document.getElementById('TTC4').innerHTML = phraseNotes[3];
+    document.getElementById('TTC5').innerHTML = phraseNotes[4];
+    document.getElementById('TTC6').innerHTML = phraseNotes[5];
+}
+
+
+
+</script>
+</body>
+</html>
